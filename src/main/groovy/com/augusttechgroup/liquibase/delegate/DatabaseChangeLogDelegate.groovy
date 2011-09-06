@@ -92,10 +92,13 @@ class DatabaseChangeLogDelegate {
       params.path = physicalChangeLogLocation.replaceFirst("/[^/]*\$","") + "/" + params.path	
     }
       def files = []
-      new File(params.path).eachFileMatch(~/.*.groovy/) { file->
-        files << file.path
+      def filesUrlEnumeration = resourceAccessor.getResources(params.path)
+      while(filesUrlEnumeration.hasMoreElements()) {
+          URL fileUrl = filesUrlEnumeration.nextElement()
+          if(fileUrl.file.endsWith(".groovy")) {
+              files << new File(fileUrl.toURI()).path
+          }
       }
-
       files.sort().each { filename ->
         includeChangeLog(filename)
       }
